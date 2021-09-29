@@ -176,13 +176,8 @@ static _arr_inline size_t _arr_c_add_ptr(void *arr_obj, size_t actual_capacity, 
 #define arr_add_ptr(arr, element)                                   \
 ({                                                                  \
     const _arr_auto _arr = (arr);                                   \
-    const _arr_auto _element = (element);                           \
-    static_assert(                                                  \
-        __builtin_types_compatible_p(                               \
-            typeof(_arr->elements[0]),                              \
-            typeof(*_element)),                                     \
-        #element " cannot be added to " #arr " (type mismatch)!"    \
-    );                                                              \
+    const typeof(&_arr->elements[0]) _element =                     \
+        (typeof(&_arr->elements[0]))(element);                      \
     _arr_selector(                                                  \
         _arr,                                                       \
         _arr_d_add_ptr(_arr, _element, sizeof(*_element)),          \
@@ -196,13 +191,7 @@ static _arr_inline size_t _arr_c_add_ptr(void *arr_obj, size_t actual_capacity, 
 #define arr_add(arr, element)                                       \
 ({                                                                  \
     const _arr_auto _arr_p = (arr);                                 \
-    const _arr_auto _element_p = (element);                         \
-    static_assert(                                                  \
-        __builtin_types_compatible_p(                               \
-            typeof(_arr_p->elements[0]),                            \
-            typeof(_element_p)),                                    \
-        #element " cannot be added to " #arr " (type mismatch)!"    \
-    );                                                              \
+    const typeof(_arr_p->elements[0]) _element_p = (element);       \
     arr_add_ptr(_arr_p, &_element_p);                               \
 })
 

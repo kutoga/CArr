@@ -1,8 +1,31 @@
 #include <stdio.h>
 #include "carr.h"
 
+typedef struct {
+    const char *name;
+    t_arr_c(const char *, 4) hobbies;
+} Person;
+
 int main()
 {
+    t_arr_d(Person) persons = {0};
+
+    {
+        Person p = {0};
+        p.name = "Kevin";
+        arr_add(&p.hobbies, "jogging");
+        arr_add(&p.hobbies, "programming");
+        arr_add_ptr(&persons, &p);
+    }
+
+    {
+        Person p = {0};
+        p.name = "Kevin";
+        arr_add(&p.hobbies, "jogging");
+        arr_add(&p.hobbies, "programming");
+        arr_add_ptr(&persons, &p);
+    }
+
     t_arr_d(int) d_arr = {0};
     t_arr_c(int, 12) c_arr = {0};
 
