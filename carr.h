@@ -74,12 +74,15 @@ static _arr_inline void _arr_d_destroy(void *arr_obj)
 {
     t_arr_d(void) *arr = arr_obj;
     free(arr->elements);
+    arr->elements = NULL;
+    arr->capacity = 0;
 }
 
 #define arr_destroy(arr)                                            \
 do {                                                                \
     _arr_auto _arr = (arr);                                         \
     _arr_selector(_arr, _arr_d_destroy(arr), 0);                    \
+    _arr->count = 0;
 } while (0)
 
 /* arr_count(&arr) */
@@ -95,7 +98,7 @@ static _arr_inline size_t _arr_d_capacity(void *arr_obj)
     return arr->capacity;
 }
 
-#define _arr_c_capacity(arr)                                        \
+#define arr_c_capacity(arr)                                         \
 (sizeof((arr)->elements) / sizeof((arr)->elements[0]))
 
 #define arr_capacity(arr)                                           \
@@ -104,7 +107,7 @@ static _arr_inline size_t _arr_d_capacity(void *arr_obj)
     _arr_selector(                                                  \
         _arr,                                                       \
         _arr_d_capacity(_arr),                                      \
-        _arr_c_capacity(_arr)                                       \
+        arr_c_capacity(_arr)                                        \
     );                                                              \
 })
 
@@ -146,7 +149,7 @@ do {                                                                \
     _arr_selector(                                                  \
         _arr,                                                       \
         _arr_d_ensure_capacity(_arr, _capacity),                    \
-        _arr_c_ensure_capacity(_arr_c_capacity(_arr), _capacity,    \
+        _arr_c_ensure_capacity(arr_c_capacity(_arr), _capacity,     \
                                sizeof(_arr->elements[0]))           \
     )                                                               \
 } while (0)
@@ -181,7 +184,7 @@ static _arr_inline size_t _arr_c_add_ptr(void *arr_obj, size_t actual_capacity, 
     _arr_selector(                                                  \
         _arr,                                                       \
         _arr_d_add_ptr(_arr, _element, sizeof(*_element)),          \
-        _arr_c_add_ptr(_arr, _arr_c_capacity(_arr),                 \
+        _arr_c_add_ptr(_arr, arr_c_capacity(_arr),                  \
                     _element, sizeof(*_element))                    \
     );                                                              \
 })
@@ -199,7 +202,7 @@ static _arr_inline size_t _arr_c_add_ptr(void *arr_obj, size_t actual_capacity, 
 
 #define arr_ptr_at(arr, index)                                      \
 ({                                                                  \
-    const _arr_auto _arr = (arr);                                   \
+    _arr_auto _arr = (arr);                                         \
     const _arr_auto _index = (index);                               \
     if (_arr_unlikely((int)_index < 0 || _index >= _arr->count)) {  \
         _arr_fatal("Index out of range!");                          \
