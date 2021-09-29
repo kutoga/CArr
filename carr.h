@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 #include <limits.h>
 #include <assert.h>
@@ -23,6 +24,8 @@ _Generic(                                                           \
 #define _arr_inline                                                 \
 inline __attribute__((always_inline))
 
+#define _arr_likely(x)                                              \
+__builtin_expect(!!(x), 1)
 #define _arr_unlikely(x)                                            \
 __builtin_expect(!!(x), 0)
 
@@ -53,18 +56,16 @@ static inline unsigned int _arr_round_up_pow2(unsigned int n)
 #define t_arr_d(type)                                               \
 struct {                                                            \
     size_t count;                                                   \
+    _arr_d_marker_type _marker[0];                                  \
     size_t capacity;                                                \
     type *elements;                                                 \
-                                                                    \
-    _arr_d_marker_type _marker[0];                                  \
 }
 
 #define t_arr_c(type, capacity)                                     \
 struct {                                                            \
     size_t count;                                                   \
-    type elements[capacity];                                        \
-                                                                    \
     _arr_c_marker_type _marker[0];                                  \
+    type elements[capacity];                                        \
 }
 
 /* arr_destroy(&arr) */
@@ -150,43 +151,59 @@ do {                                                                \
     )                                                               \
 } while (0)
 
-/* arr_add(&arr) */
+/* arr_add_ptr(&arr) */
 
-static _arr_inline size_t _arr_d_add(void *arr_obj, const void *element, size_t element_size)
+static _arr_inline bool _arr_d_add_ptr(void *arr_obj, const void *element, size_t element_size)
 {
     t_arr_d(char) *arr = arr_obj;
     _arr_d_ensure_capacity(arr, arr->count + 1, element_size);
     memcpy(&arr->elements[element_size * arr->count], element, element_size);
     ++arr->count;
-    return arr->count;
+    return true;
 }
 
-static _arr_inline size_t _arr_c_add(void *arr_obj, size_t actual_capacity, const void *element, size_t element_size)
+static _arr_inline size_t _arr_c_add_ptr(void *arr_obj, size_t actual_capacity, const void *element, size_t element_size)
 {
     t_arr_c(char, 1) *arr = arr_obj;
-    _arr_c_ensure_capacity(actual_capacity, arr->count + 1);
-    memcpy(&arr->elements[element_size * arr->count], element, element_size);
-    ++arr->count;
-    return arr->count;
+    const bool _ok = actual_capacity > arr->count;
+    if (_arr_likely(_ok)) {
+        memcpy(&arr->elements[element_size * arr->count], element, element_size);
+        ++arr->count;
+    }
+    return _ok;
 }
 
-#define arr_add(arr, element)                                       \
+#define arr_add_ptr(arr, element)                                   \
 ({                                                                  \
     const _arr_auto _arr = (arr);                                   \
     const _arr_auto _element = (element);                           \
     static_assert(                                                  \
         __builtin_types_compatible_p(                               \
             typeof(_arr->elements[0]),                              \
-            typeof(_element)),                                      \
+            typeof(*_element)),                                     \
         #element " cannot be added to " #arr " (type mismatch)!"    \
     );                                                              \
     _arr_selector(                                                  \
         _arr,                                                       \
-        _arr_d_add(_arr, &_element, sizeof(_element)),              \
-        _arr_c_add(_arr, _arr_d_capacity(_arr),                     \
-                   &_element, sizeof(_element))                     \
+        _arr_d_add_ptr(_arr, _element, sizeof(*_element)),          \
+        _arr_c_add_ptr(_arr, _arr_c_capacity(_arr),                 \
+                    _element, sizeof(*_element))                    \
     );                                                              \
-    _arr->count;                                                    \
+})
+
+/* arr_add(&arr) */
+
+#define arr_add(arr, element)                                       \
+({                                                                  \
+    const _arr_auto _arr_p = (arr);                                 \
+    const _arr_auto _element_p = (element);                         \
+    static_assert(                                                  \
+        __builtin_types_compatible_p(                               \
+            typeof(_arr_p->elements[0]),                            \
+            typeof(_element_p)),                                    \
+        #element " cannot be added to " #arr " (type mismatch)!"    \
+    );                                                              \
+    arr_add_ptr(_arr_p, &_element_p);                               \
 })
 
 /* arr_ptr_at(&arr) */
@@ -215,5 +232,35 @@ static _arr_inline size_t _arr_c_add(void *arr_obj, size_t actual_capacity, cons
 
 #define arr_at_unsafe(arr, index)                                   \
 ((arr)->elements[index])
+
+/* arr_foreach_ptr */
+
+#define arr_foreach_ptr(arr, iter)                                  \
+for (struct {                                                       \
+    size_t index;                                                   \
+    typeof((arr)->elements[0]) *value;                              \
+} iter = {.index = 0}; ({                                           \
+    const _arr_auto _arr = (arr);                                   \
+    const bool _ok = iter.index < _arr->count;                      \
+    if (_ok) {                                                      \
+        iter.value = &_arr->elements[iter.index];                   \
+    }                                                               \
+    _ok;                                                            \
+}); ++iter.index)
+
+/* arr_foreach */
+
+#define arr_foreach(arr, iter)                                      \
+for (struct {                                                       \
+    size_t index;                                                   \
+    typeof((arr)->elements[0]) value;                               \
+} iter = {.index = 0}; ({                                           \
+    const _arr_auto _arr = (arr);                                   \
+    const bool _ok = iter.index < _arr->count;                      \
+    if (_ok) {                                                      \
+        iter.value = _arr->elements[iter.index];                    \
+    }                                                               \
+    _ok;                                                            \
+}); ++iter.index)
 
 #endif /* CARR_H */
