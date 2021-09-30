@@ -24,12 +24,21 @@ int main() {
     assert(c_ok);
     assert(d_ok);
 
-    // const T *arr_at(const t_arr *arr, size_t index)
-    //       T *arr_at(      t_arr *arr, size_t index)
-    // char **name0 = arr_at(&names, 0);
-    // printf("Name: %s\n", *name0);
+    // const T *arr_at_ptr(const t_arr *arr, size_t index)
+    //       T *arr_at_ptr(      t_arr *arr, size_t index)
+    // const T *arr_at_ptr_unsafe(const t_arr *arr, size_t index)
+    //       T *arr_at_ptr_unsafe(      t_arr *arr, size_t index)
+    //  "_unsafe"-function do no bounds-check
+    const char **name0 = arr_ptr_at(&names, 0);
+    printf("Name: %s\n", *name0);
+    int *number0 = arr_ptr_at(&numbers, 0);
+    printf("Number: %d\n", *number0);
 
-    // TODO: Document
+    // T arr_at(const t_arr *arr, size_t index)
+    // T arr_at_unsafe(const t_arr *arr, size_t index)
+    //  "_unsafe"-function does no bounds-check
+    printf("Name: %s\n", arr_at(&names, 1));
+    printf("Number: %d\n", arr_at(&numbers, 1));
 
     // size_t arr_count(const t_arr *arr)
     //  Returns the used number of elements in the array.
@@ -44,6 +53,16 @@ int main() {
     // size_t arr_c_capacity(const t_arr_c(T, N) *arr)
     //  Like arr_capacity, but a compile-time constant which returns N
     printf("Capacity: %lu\n", arr_c_capacity(&names));
+
+    // arr_foreach_ptr (t_arr *arr, iter_name)
+    arr_foreach_ptr (&names, iter) {
+        printf("names[%lu] = %s\n", iter.index, *iter.value);
+    }
+
+    // arr_foreach_ptr (t_arr *arr, iter_name)
+    arr_foreach (&names, iter) {
+        printf("names[%lu] = %s\n", iter.index, iter.value);
+    }
 
     // void arr_destroy(t_arr *arr)
     //  Cleans up dynamically allocated data. Has no effect for arr_c(T, N)

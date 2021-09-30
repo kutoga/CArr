@@ -81,8 +81,8 @@ static _arr_inline void _arr_d_destroy(void *arr_obj)
 #define arr_destroy(arr)                                            \
 do {                                                                \
     _arr_auto _arr = (arr);                                         \
-    _arr_selector(_arr, _arr_d_destroy(arr), 0);                    \
-    _arr->count = 0;
+    (void)_arr_selector(_arr, _arr_d_destroy(arr), 0);                    \
+    _arr->count = 0;                                                \
 } while (0)
 
 /* arr_count(&arr) */
@@ -178,9 +178,9 @@ static _arr_inline size_t _arr_c_add_ptr(void *arr_obj, size_t actual_capacity, 
 
 #define arr_add_ptr(arr, element)                                   \
 ({                                                                  \
-    const _arr_auto _arr = (arr);                                   \
-    const typeof(&_arr->elements[0]) _element =                     \
-        (typeof(&_arr->elements[0]))(element);                      \
+    _arr_auto _arr = (arr);                                   \
+    const typeof(_arr->elements[0]) *_element =                     \
+        /*(typeof(&_arr->elements[0]))*/(element);                      \
     _arr_selector(                                                  \
         _arr,                                                       \
         _arr_d_add_ptr(_arr, _element, sizeof(*_element)),          \
@@ -228,10 +228,10 @@ static _arr_inline size_t _arr_c_add_ptr(void *arr_obj, size_t actual_capacity, 
 /* arr_foreach_ptr */
 
 #define arr_foreach_ptr(arr, iter)                                  \
-for (struct {                                                       \
-    size_t index;                                                   \
-    typeof((arr)->elements[0]) *value;                              \
-} iter = {.index = 0}; ({                                           \
+for (_arr_auto iter = ({ struct {                                   \
+        size_t index;                                               \
+        typeof((arr)->elements[0]) *value;                          \
+    } _res = {.index = 0}; _res; }); ({                             \
     const _arr_auto _arr = (arr);                                   \
     const bool _ok = iter.index < _arr->count;                      \
     if (_ok) {                                                      \
@@ -243,10 +243,10 @@ for (struct {                                                       \
 /* arr_foreach */
 
 #define arr_foreach(arr, iter)                                      \
-for (struct {                                                       \
-    size_t index;                                                   \
-    typeof((arr)->elements[0]) value;                               \
-} iter = {.index = 0}; ({                                           \
+for (_arr_auto iter = ({ struct {                                   \
+        size_t index;                                               \
+        typeof((arr)->elements[0]) value;                           \
+    } _res = {.index = 0}; _res; }); ({                             \
     const _arr_auto _arr = (arr);                                   \
     const bool _ok = iter.index < _arr->count;                      \
     if (_ok) {                                                      \
