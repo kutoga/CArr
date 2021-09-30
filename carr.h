@@ -81,7 +81,7 @@ static _arr_inline void _arr_d_destroy(void *arr_obj)
 #define arr_destroy(arr)                                            \
 do {                                                                \
     _arr_auto _arr = (arr);                                         \
-    (void)_arr_selector(_arr, _arr_d_destroy(arr), 0);                    \
+    (void)_arr_selector(_arr, _arr_d_destroy(arr), 0);              \
     _arr->count = 0;                                                \
 } while (0)
 
@@ -178,9 +178,9 @@ static _arr_inline size_t _arr_c_add_ptr(void *arr_obj, size_t actual_capacity, 
 
 #define arr_add_ptr(arr, element)                                   \
 ({                                                                  \
-    _arr_auto _arr = (arr);                                   \
+    _arr_auto _arr = (arr);                                         \
     const typeof(_arr->elements[0]) *_element =                     \
-        /*(typeof(&_arr->elements[0]))*/(element);                      \
+        /*(typeof(&_arr->elements[0]))*/(element);                  \
     _arr_selector(                                                  \
         _arr,                                                       \
         _arr_d_add_ptr(_arr, _element, sizeof(*_element)),          \
