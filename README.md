@@ -1,6 +1,6 @@
 # CArr
 
-I use to program quite a lot of (efficient) C and often I need some simple and stupid arrays like these:
+I program quite a lot of C and from time to time I need some simple and stupid arrays like these:
 
 ```C
 struct t_person {
