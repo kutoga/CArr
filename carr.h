@@ -263,6 +263,9 @@ static inline void _arr_check_bounds(size_t count, size_t index)
 
 /*
  * arr_foreach_ptr (const t_arr *arr, iter)
+ *   iter has these fields:
+ *   - size_t index
+ *   - T *value
  */
 
 #define arr_foreach_ptr(arr, iter)                                  \
@@ -280,6 +283,9 @@ for (_arr_auto iter = ({ struct {                                   \
 
 /*
  * arr_foreach (const t_arr *arr, iter)
+ *   iter has these fields:
+ *   - size_t index
+ *   - T value
  */
 
 #define arr_foreach(arr, iter)                                      \
