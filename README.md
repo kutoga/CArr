@@ -82,7 +82,9 @@ and `t_arr_c(T, N)`:
 
 int main() {
 
-    // create two empty arrays
+    // create two empty arrays:
+    // - names contains the type "const char *" and has a constant size of 3 elements
+    // - numbers contains the type int and is dynamically allocated
     t_arr_c(const char *, 3) names   = {0};
     t_arr_d(int)             numbers = {0};
 
