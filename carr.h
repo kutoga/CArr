@@ -51,7 +51,9 @@ static inline unsigned int _arr_round_up_pow2(unsigned int n)
     return res < n ? 0 : res;
 }
 
-/* Type definitions */
+/*
+ * Type definitions
+ */
 
 #define t_arr_d(type)                                               \
 struct {                                                            \
@@ -68,7 +70,9 @@ struct {                                                            \
     type elements[capacity];                                        \
 }
 
-/* arr_destroy(&arr) */
+/*
+ * void arr_destroy(t_arr *arr)
+ */
 
 static _arr_inline void _arr_d_destroy(void *arr_obj)
 {
@@ -85,12 +89,17 @@ do {                                                                \
     _arr->count = 0;                                                \
 } while (0)
 
-/* arr_count(&arr) */
+/*
+ * size_t arr_count(t_arr *arr)
+ */
 
 #define arr_count(arr)                                              \
 (arr)->count
 
-/* arr_capacity(&arr) */
+/*
+ * size_t arr_capacity(t_arr *arr)
+ * size_t arr_c_capacity(t_arr_c(T, N) *arr) <-- compile time constant
+ */
 
 static _arr_inline size_t _arr_d_capacity(void *arr_obj)
 {
@@ -111,14 +120,18 @@ static _arr_inline size_t _arr_d_capacity(void *arr_obj)
     );                                                              \
 })
 
-/* arr_clear(&arr) */
+/*
+ * void arr_clear(t_arr *arr)
+ */
 
 #define arr_clear(arr)                                              \
 do {                                                                \
     (arr)->count = 0;                                               \
 } while (0)
 
-/* arr_ensure_capacity */
+/*
+ * void arr_ensure_capacity(t_arr *arr)
+ */
 
 static inline void _arr_d_ensure_capacity(void *arr_obj, size_t capacity, size_t element_size)
 {
@@ -154,7 +167,9 @@ do {                                                                \
     )                                                               \
 } while (0)
 
-/* arr_add_ptr(&arr) */
+/*
+ * void arr_add_ptr(arr_t *arr, const T *element)
+ */
 
 static _arr_inline bool _arr_d_add_ptr(void *arr_obj, const void *element, size_t element_size)
 {
@@ -189,7 +204,9 @@ static _arr_inline size_t _arr_c_add_ptr(void *arr_obj, size_t actual_capacity, 
     );                                                              \
 })
 
-/* arr_add(&arr) */
+/*
+ * void arr_add(arr_t *arr, T element)
+ */
 
 #define arr_add(arr, element)                                       \
 ({                                                                  \
@@ -198,34 +215,50 @@ static _arr_inline size_t _arr_c_add_ptr(void *arr_obj, size_t actual_capacity, 
     arr_add_ptr(_arr_p, &_element_p);                               \
 })
 
-/* arr_ptr_at(&arr) */
+/*
+ * const T *arr_ptr_at(const t_arr *arr, size_t index)
+ *       T *arr_ptr_at(t_arr *arr,       size_t index)
+ */
+
+static inline void _arr_check_bounds(size_t count, size_t index)
+{
+    if (_arr_unlikely(index) >= count) {
+        _arr_fatal("Index out of range!");
+    }
+}
 
 #define arr_ptr_at(arr, index)                                      \
 ({                                                                  \
     _arr_auto _arr = (arr);                                         \
-    const _arr_auto _index = (index);                               \
-    if (_arr_unlikely((int)_index < 0 || _index >= _arr->count)) {  \
-        _arr_fatal("Index out of range!");                          \
-    }                                                               \
+    const size_t _index = (index);                                  \
     &_arr->elements[_index];                                        \
 })
 
-/* arr_at(&arr) */
+/*
+ * T arr_at(const t_arr *arr, size_t index)
+ */
 
 #define arr_at(arr, index)                                          \
 (*arr_ptr_at((arr), (index)))
 
-/* arr_ptr_at_unsafe(&arr) */
+/*
+ * const T *arr_ptr_at_unsafe(const t_arr *arr, size_t index)
+ *       T *arr_ptr_at_unsafe(t_arr *arr,       size_t index)
+ */
 
 #define arr_ptr_at_unsafe(arr, index)                               \
 (&(arr)->elements[index])
 
-/* arr_at_unsafe(&arr) */
+/*
+ * T arr_at_unsafe(const t_arr *arr, size_t index)
+ */
 
 #define arr_at_unsafe(arr, index)                                   \
 ((arr)->elements[index])
 
-/* arr_foreach_ptr */
+/*
+ * arr_foreach_ptr (const t_arr *arr, iter)
+ */
 
 #define arr_foreach_ptr(arr, iter)                                  \
 for (_arr_auto iter = ({ struct {                                   \
@@ -240,7 +273,9 @@ for (_arr_auto iter = ({ struct {                                   \
     _ok;                                                            \
 }); ++iter.index)
 
-/* arr_foreach */
+/*
+ * arr_foreach (const t_arr *arr, iter)
+ */
 
 #define arr_foreach(arr, iter)                                      \
 for (_arr_auto iter = ({ struct {                                   \
