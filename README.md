@@ -102,10 +102,21 @@ int main() {
     assert(c_ok);
     assert(d_ok);
 
-    // const T *arr_at(const t_arr *arr, size_t index)
-    //       T *arr_at(      t_arr *arr, size_t index)
-    char **name0 = arr_at(&names, 0);
+    // const T *arr_at_ptr(const t_arr *arr, size_t index)
+    //       T *arr_at_ptr(      t_arr *arr, size_t index)
+    // const T *arr_at_ptr_unsafe(const t_arr *arr, size_t index)
+    //       T *arr_at_ptr_unsafe(      t_arr *arr, size_t index)
+    //  "_unsafe"-function do no bounds-check
+    const char **name0 = arr_ptr_at(&names, 0);
     printf("Name: %s\n", *name0);
+    int *number0 = arr_ptr_at(&numbers, 0);
+    printf("Number: %d\n", *number0);
+
+    // T arr_at(const t_arr *arr, size_t index)
+    // T arr_at_unsafe(const t_arr *arr, size_t index)
+    //  "_unsafe"-function does no bounds-check
+    printf("Name: %s\n", arr_at(&names, 1));
+    printf("Number: %d\n", arr_at(&numbers, 1));
 
     // size_t arr_count(const t_arr *arr)
     //  Returns the used number of elements in the array.
@@ -121,9 +132,29 @@ int main() {
     //  Like arr_capacity, but a compile-time constant which returns N
     printf("Capacity: %lu\n", arr_c_capacity(&names));
 
+    // arr_foreach_ptr (t_arr *arr, iter_name)
+    arr_foreach_ptr (&names, iter) {
+        printf("names[%lu] = %s\n", iter.index, *iter.value);
+    }
+
+    // arr_foreach_ptr (t_arr *arr, iter_name)
+    arr_foreach (&names, iter) {
+        printf("names[%lu] = %s\n", iter.index, iter.value);
+    }
+
     // void arr_destroy(t_arr *arr)
     //  Cleans up dynamically allocated data. Has no effect for arr_c(T, N)
     arr_destroy(&names);
     arr_destroy(&numbers);
+
+    // be sure that the structures have the minimal possible size
+    assert(sizeof(names)   == sizeof(size_t) + sizeof(const char *) * 3);
+    //                        count            elements               capacity
+    assert(sizeof(numbers) == sizeof(size_t) + sizeof(int *)        + sizeof(size_t));
+    //                        count            elements               capacity
 }
+
+// the arr-types can be used in typedef, because they are normal types
+typedef t_arr_d(char) my_arr_type;
+typedef t_arr_c(unsigned long, 3) my_other_arr_type;
 ```

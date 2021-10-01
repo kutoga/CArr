@@ -53,6 +53,10 @@ static inline unsigned int _arr_round_up_pow2(unsigned int n)
 
 /*
  * Type definitions
+ * A zero-sized type marker is used in order to distinguish at compile-time
+ * between t_arr_d(T) and t_arr_c(T, N). Note that the type-marker must not
+ * be the first element, otherwise the array can no longer be initialized
+ * with "... = {0};"
  */
 
 #define t_arr_d(type)                                               \

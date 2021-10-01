@@ -68,4 +68,14 @@ int main() {
     //  Cleans up dynamically allocated data. Has no effect for arr_c(T, N)
     arr_destroy(&names);
     arr_destroy(&numbers);
+
+    // be sure that the structures have the minimal possible size
+    assert(sizeof(names)   == sizeof(size_t) + sizeof(const char *) * 3);
+    //                        count            elements               capacity
+    assert(sizeof(numbers) == sizeof(size_t) + sizeof(int *)        + sizeof(size_t));
+    //                        count            elements               capacity
 }
+
+// the arr-types can be used in typedef, because they are normal types
+typedef t_arr_d(char) my_arr_type;
+typedef t_arr_c(unsigned long, 3) my_other_arr_type;
