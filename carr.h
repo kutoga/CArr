@@ -231,6 +231,7 @@ static inline void _arr_check_bounds(size_t count, size_t index)
 ({                                                                  \
     _arr_auto _arr = (arr);                                         \
     const size_t _index = (index);                                  \
+    _arr_check_bounds(_arr->count, _index);                         \
     &_arr->elements[_index];                                        \
 })
 
