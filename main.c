@@ -15,7 +15,7 @@ int main() {
     assert(c_ok);
     assert(d_ok);
 
-    // bool arr_add(t_arr *arr, T element)
+    // bool arr_add_ptr(t_arr *arr, const T *element)
     //  Returns true if successful, otherwise false.
     const char *name = "Karl";
     c_ok = arr_add_ptr(&names,  &name);
