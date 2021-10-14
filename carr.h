@@ -172,7 +172,7 @@ do {                                                                \
 } while (0)
 
 /*
- * void arr_add_ptr(arr_t *arr, const T *element)
+ * void arr_add_ptr(t_arr *arr, const T *element)
  */
 
 static _arr_inline bool _arr_d_add_ptr(void *arr_obj, const void *element, size_t element_size)
@@ -209,7 +209,7 @@ static _arr_inline size_t _arr_c_add_ptr(void *arr_obj, size_t actual_capacity, 
 })
 
 /*
- * void arr_add(arr_t *arr, T element)
+ * void arr_add(t_arr *arr, T element)
  */
 
 #define arr_add(arr, element)                                       \
